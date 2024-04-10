@@ -39,6 +39,9 @@ primary_types = [
 Install as you normally would. There are no configuration options. Add
 `aspace_search_modifications` to `AppConfig[:plugins]` in your configuration.
 
+The plugin does not have any additional dependencies so you do not need to 
+run the `initialize-plugin` script.
+
 ## Compatibility
 
 Compatible with ArchivesSpace v3.3.1 - 3.5.0.
