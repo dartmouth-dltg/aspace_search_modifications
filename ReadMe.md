@@ -4,7 +4,11 @@
 
 An ArchivesSpace plugin which modifies the default PUI search behavior to
 omit search results from matches to url strings where the search term(s)
-contain a date like (e.g. YYYY) pattern. For example, a search of 
+contain a date like (e.g. YYYY) pattern. 
+
+Read this [important note about omitted results](#omitted-results-note).
+
+For example, a search of 
 `united states 1949` would result in a modified search where the following
 strings are added with `NOT` clauses.
 
@@ -33,6 +37,18 @@ primary_types = [
         'top_containers'
       ]
 ```
+
+### Omitted Results Note
+
+In certain scenarios the use of this plugin can cause relevant results to be omitted.
+If the date-like string a user is searching for happens to be in a primary type whose
+id is that date-like string, then that result will *not* be part of the result set.
+
+#### Example
+
+A user searches for `jane doe 1949`. In the Jane Doe Papers, there is some correspondence
+from 1949. The Jane Doe Papers happen to have an id of 1949 (`resources/1949`). None of the
+results from the Jane Doe Papers will be part of the final result set.
 
 ## Installation
 

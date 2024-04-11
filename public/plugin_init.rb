@@ -1,4 +1,36 @@
+# list out the types of things we want to negate
+# with statements like NOT "{type}/{date_like_number}"
+AppConfig[:aspace_search_modifications_primary_types] = [
+  'accessions',
+  'agents/families',
+  'agents/corporate_entitites',
+  'agents/people',
+  'archival_objects',
+  'classifications',
+  'digital_objects',
+  'digital_object_components',
+  'locations',
+  'objects',
+  'resources',
+  'record_groups',
+  'subjects',
+  'top_containers'
+]
+
 Rails.application.config.after_initialize do
+
+  class SearchController
+
+    alias_method :pre_aspace_search_mod_search, :search
+
+    def search
+      if params[:reset] == 'true' && params[:q] && params[:q].length > 0
+        params[:q] = remove_added_custom_params(params)[:q]
+      end
+      pre_aspace_search_mod_search
+    end
+
+  end
 
   Searchable.module_eval do
     alias_method :pre_aspace_search_mod_set_up_advanced_search, :set_up_advanced_search
@@ -43,26 +75,28 @@ Rails.application.config.after_initialize do
       @search[:search_statement] = I18n.t('search_results.search_for', :type => type,
                                           :conditions => "<ul class='no-bullets'>#{condition}</ul>")
     end
+
+    def remove_added_custom_params(params)
+      indices_to_remove = []
+
+      AppConfig[:aspace_search_modifications_primary_types].each do |type|
+        params[:q].each_with_index do |query, idx|
+          if query.include?('NOT "' + type + '/')
+            indices_to_remove << idx
+          end
+        end
+      end
+  
+      params[:q] = params[:q].delete_if.with_index{|_, i| indices_to_remove.include?(i) }
+      params[:op] = params[:op].delete_if.with_index{|_, i| indices_to_remove.include?(i) }
+  
+      params
+    end
   
     def add_date_like_omissions(params)
-      # list out the types of things we want to negate
-      # with statements like NOT "{type}/{date_like_number}"
-      primary_types = [
-        'accessions',
-        'agents/families',
-        'agents/corporate_entitites',
-        'agents/people',
-        'archival_objects',
-        'classifications',
-        'digital_objects',
-        'digital_object_components',
-        'locations',
-        'objects',
-        'resources',
-        'record_groups',
-        'subjects',
-        'top_containers'
-      ]
+      primary_types = AppConfig[:aspace_search_modifications_primary_types]
+
+      params = remove_added_custom_params(params)
 
       @search_length = params[:q].length
 
