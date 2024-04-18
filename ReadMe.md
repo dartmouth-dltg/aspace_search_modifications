@@ -40,12 +40,12 @@ run the `initialize-plugin` script.
 
 There is one optional configuration option which allows you to set your own list of fields to
 exclude from the fullrecord field. For example, if you wanted to exclude the default fields
-provided by the plugin as well as omit the repository details from the fullrecord for an object:
+provided by the plugin as well as omit the ead_id from the fullrecord for an object:
 ```
 AppConfig[:aspace_search_modification_excludes] = [
+    "ead_id",
     "persistent_id",
     "ref",
-    "repository",
     "uri"
 ]
 ```
