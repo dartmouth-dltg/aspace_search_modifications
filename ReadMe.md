@@ -2,75 +2,74 @@
 
 ## About
 
-An ArchivesSpace plugin which modifies the default PUI search behavior to
-omit search results from matches to url strings where the search term(s)
-contain a date like (e.g. YYYY) pattern. 
+An ArchivesSpace plugin which modifies the `fullrecord` search field(s) to omit
+additional fields which would pollute the standard keyword search result set. The 
+`fullrecord` field is the field searched against when doing a keyword search in
+the staff interface and the PUI.
 
-Read this [important note about omitted results](#omitted-results-note).
-
-For example, a search of 
-`united states 1949` would result in a modified search where the following
-strings are added with `NOT` clauses.
-
+The default additional fields omitted are
 ```
-NOT "accessions/1949"
-NOT "resources/1949"
-...
+persistent_id
+ref
+uri
 ```
 
-The following types are added to the search query with a `NOT` clause
+Consider also omitting the following fields:
 ```
-primary_types = [
-        'accessions',
-        'agents/families',
-        'agents/corporate_entitites',
-        'agents/people',
-        'archival_objects',
-        'classifications',
-        'digital_objects',
-        'digital_object_components',
-        'locations',
-        'objects',
-        'resources',
-        'record_groups',
-        'subjects',
-        'top_containers'
-      ]
+ead_id
+ead_location
 ```
 
-### Omitted Results Note
+You may also want to consider removing any `_resolved` data. This will narrow search results
+to only data contained within the object itself. Note that this will *not* return results for
+agents linked to the object, so if you searched for an agent's name, you would *only* get that
+agent record, unless the agent's name was mentioned in a note or other field on the object
+itself.
 
-In certain scenarios the use of this plugin can cause relevant results to be omitted.
-If the date-like string a user is searching for happens to be in a primary type whose
-id is that date-like string, then that result will *not* be part of the result set.
-
-#### Example
-
-A user searches for `jane doe 1949`. In the Jane Doe Papers, there is some correspondence
-from 1949. The Jane Doe Papers happen to have an id of 1949 (`resources/1949`). None of the
-results from the Jane Doe Papers will be part of the final result set.
+To compensate for the removal of the ability to search for an object's id by keyword,
+a new advanced search option is added which allows a staff user to search for a specific
+object id.
 
 ## Installation
 
-Install as you normally would. There are no configuration options. Add
-`aspace_search_modifications` to `AppConfig[:plugins]` in your configuration.
+Install as you normally would. Add `aspace_search_modifications` to `AppConfig[:plugins]`
+in your configuration.
 
 The plugin does not have any additional dependencies so you do not need to 
 run the `initialize-plugin` script.
 
+There is one optional configuration option which allows you to set your own list of fields to
+exclude from the fullrecord field. For example, if you wanted to exclude the default fields
+provided by the plugin as well as omit the repository details from the fullrecord for an object:
+```
+AppConfig[:aspace_search_modification_excludes] = [
+    "persistent_id",
+    "ref",
+    "repository",
+    "uri"
+]
+```
+
+If you add additional excluded fields, consider adding additional advanced search options if your users
+may want to search on information found in the excluded fields. See the `search_definitions` file in
+this plugin for an example.
+
+A reindex is required to fully benefit from these changes, though this can be a soft reindex.
+See the ArchivesSpace [Tech Docs](https://archivesspace.github.io/tech-docs/administration/indexes.html).
+
 ## Compatibility
 
-Compatible with ArchivesSpace v3.3.1 - 3.5.0.
+Compatible with ArchivesSpace v3.3.1 - 3.5.0. The plugin may work with earlier 3.x versions
+but has not been tested.
 
 ## Core Overrides
 
-Two core methods from the Searchable module (`/public/app/controllers/concerns/searchable.rb`)
-are patched in this plugin. If you are patching these in other plugins, you will need to 
-reconcile the two.
+Two core methods are patched in this plugin. If you are patching
+these in other plugins, you will need to reconcile the two.
 
 ```
-Searchable::set_up_advanced_search
-Searchable::set_search_statement
+IndexerCommon::extract_string_values (if using v3.3.1 or lower)
+IndexerCommonConfig::fullrecord_excludes (v3.4.0+)
 ```
 
 ## Credits
