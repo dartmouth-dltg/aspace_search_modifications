@@ -1,4 +1,4 @@
-# WIP: ArchivesSpace Search Modifications
+# ArchivesSpace Search Modifications
 
 ## About
 
@@ -42,7 +42,7 @@ There is one optional configuration option which allows you to set your own list
 exclude from the fullrecord field. For example, if you wanted to exclude the default fields
 provided by the plugin as well as omit the ead_id from the fullrecord for an object:
 ```
-AppConfig[:aspace_search_modification_excludes] = [
+AppConfig[:aspace_search_modifications_excludes] = [
     "ead_id",
     "persistent_id",
     "ref",
@@ -54,23 +54,21 @@ If you add additional excluded fields, consider adding additional advanced searc
 may want to search on information found in the excluded fields. See the `search_definitions` file in
 this plugin for an example.
 
+Note that `uri` is a Solr `string` field, so the advanced search for it matches the full
+value exactly; partial URIs will not match.
+
 A reindex is required to fully benefit from these changes, though this can be a soft reindex.
 See the ArchivesSpace [Tech Docs](https://archivesspace.github.io/tech-docs/administration/indexes.html).
 
 ## Compatibility
 
-Compatible with ArchivesSpace v3.3.1 - 3.5.0. The plugin may work with earlier 3.x versions
-but has not been tested.
+Compatible with ArchivesSpace v3.4.0 - 4.2.1. Support for v3.3.1 and earlier was removed.
 
 ## Core Overrides
 
-Two core methods are patched in this plugin. If you are patching
-these in other plugins, you will need to reconcile the two.
-
-```
-IndexerCommon::extract_string_values (if using v3.3.1 or lower)
-IndexerCommonConfig::fullrecord_excludes (v3.4.0+)
-```
+`IndexerCommonConfig.fullrecord_excludes` is patched via `prepend`, so the core list is
+kept and the plugin's excludes are appended. If you patch this method in other plugins,
+make sure they also call `super`.
 
 ## Credits
 
