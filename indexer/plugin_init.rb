@@ -12,7 +12,8 @@ AppConfig[:aspace_search_modifications_excludes] = configured || default_exclude
 # Prepend rather than redefine so the core exclude list is preserved across ArchivesSpace upgrades
 module AspaceSearchModExcludes
   def fullrecord_excludes
-    (super + AppConfig[:aspace_search_modifications_excludes]).uniq
+    # Called per key during indexing; both lists are fixed after startup, so build once
+    @aspace_search_mod_excludes ||= (super + AppConfig[:aspace_search_modifications_excludes]).uniq
   end
 end
 
