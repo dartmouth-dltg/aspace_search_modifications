@@ -9,10 +9,16 @@ the staff interface and the PUI.
 
 The default additional fields omitted are
 ```
+ancestors
 persistent_id
 ref
 uri
 ```
+
+`ancestors` matters when other plugins resolve ancestors for indexing: without it, every
+ancestor's text (titles, notes and so on) ends up in each archival object's `fullrecord` in the
+staff index, so a keyword in a collection's scope note matches every component of the collection.
+The PUI indexer already removes ancestors before building `fullrecord`.
 
 Consider also omitting the following fields:
 ```
@@ -43,6 +49,7 @@ exclude from the fullrecord field. For example, if you wanted to exclude the def
 provided by the plugin as well as omit the ead_id from the fullrecord for an object:
 ```
 AppConfig[:aspace_search_modifications_excludes] = [
+    "ancestors",
     "ead_id",
     "persistent_id",
     "ref",

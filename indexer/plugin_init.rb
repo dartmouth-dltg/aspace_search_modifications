@@ -1,4 +1,7 @@
-default_excludes = ["persistent_id", "ref", "uri"]
+# ancestors: plugins that resolve ancestors for indexing would otherwise add every
+# ancestor's text to each archival object's fullrecord in the staff index (the PUI
+# indexer already removes ancestors before building fullrecord)
+default_excludes = ["ancestors", "persistent_id", "ref", "uri"]
 
 configured = AppConfig[:aspace_search_modifications_excludes] if AppConfig.has_key?(:aspace_search_modifications_excludes)
 
